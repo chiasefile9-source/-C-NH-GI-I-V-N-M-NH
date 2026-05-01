@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Khám Phá Vận Mệnh Tổng Hợp</title>
+    <style>
+        :root {
+            --mystic-purple: #6c5ce7;
+            --gold: #fdcb6e;
+            --dark: #2d3436;
+            --glass: rgba(255, 255, 255, 0.95);
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(45deg, #0f0c29, #302b63, #24243e);
+            color: var(--dark);
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: var(--glass);
+            max-width: 600px;
+            width: 100%;
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        h1 { color: var(--mystic-purple); margin-bottom: 5px; font-size: 28px; }
+        .subtitle { color: #636e72; margin-bottom: 25px; font-size: 14px; }
+        
+        .input-section {
+            background: #f1f2f6;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+        }
+        input[type="date"] {
+            width: 90%;
+            padding: 12px;
+            border: 2px solid var(--mystic-purple);
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+        }
+        button {
+            margin-top: 15px;
+            background: var(--mystic-purple);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        button:hover { background: #5649c0; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4); }
+
+        .result-card { display: none; text-align: left; animation: fadeIn 0.6s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .info-box { background: white; padding: 15px; border-radius: 12px; border: 1px solid #eee; }
+        .info-box span { display: block; font-size: 12px; color: #b2bec3; text-transform: uppercase; }
+        .info-box b { color: var(--mystic-purple); font-size: 16px; }
+
+        .detail-section {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 16px;
+            background: #f9f9ff;
+            border-left: 5px solid var(--mystic-purple);
+        }
+        .tarot-section {
+            margin-top: 20px;
+            background: #fff9eb;
+            padding: 20px;
+            border-radius: 16px;
+            border: 2px dashed var(--gold);
+        }
+        .tarot-title { color: #d35400; font-weight: bold; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🔮 CẢNH GIỚI VẬN MỆNH</h1>
+    <p class="subtitle">Tử Vi - Hoàng Đạo - Tarot | Độ chính xác khá cao</p>
+
+    <div class="input-section">
+        <input type="date" id="userBirthday">
+        <button onclick="unlockDestiny()">Giải Mã Vận Mệnh</button>
+    </div>
+
+    <div id="mainResult" class="result-card">
+        <div class="grid-info">
+            <div class="info-box"><span>Tuổi Hiện Tại</span><b id="resAge"></b></div>
+            <div class="info-box"><span>Tuổi Mụ</span><b id="resAgeMu"></b></div>
+            <div class="info-box"><span>Ngày Đã Sống</span><b id="resDays"></b></div>
+            <div class="info-box"><span>Con Giáp</span><b id="resCanChi"></b></div>
+        </div>
+
+        <div class="detail-section">
+            <h3 style="margin:0 0 10px 0">🌟 Bản Mệnh & Hoàng Đạo</h3>
+            <p>• Mệnh Ngũ Hành: <b id="resMenh"></b></p>
+            <p>• Cung Hoàng Đạo: <b id="resZodiac"></b></p>
+            <p style="font-size: 14px; color: #555; line-height: 1.6;"><i>" <span id="resTraits"></span> "</i></p>
+        </div>
+
+        <div class="tarot-section">
+            <div class="tarot-title">🃏 Thông Điệp Tarot</div>
+            <p><b id="resTarotName"></b></p>
+            <p id="resTarotDesc" style="font-size: 14px; color: #636e72;"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // DỮ LIỆU HỆ THỐNG
+    const zodiacData = [
+        { name: "Ma Kết", traits: "Kiên cường, thực tế và có tham vọng lớn. Bạn là người xây dựng nền tảng vững chắc cho tương lai." },
+        { name: "Bảo Bình", traits: "Sáng tạo, độc lập và có tầm nhìn xa. Bạn luôn tìm kiếm sự đổi mới và tự do." },
+        { name: "Song Ngư", traits: "Giàu trí tưởng tượng, nhạy cảm và đầy lòng trắc ẩn. Bạn có kết nối tâm linh mạnh mẽ." },
+        { name: "Bạch Dương", traits: "Nhiệt huyết, dũng cảm và quyết đoán. Bạn sinh ra để làm người dẫn đầu." },
+        { name: "Kim Ngưu", traits: "Kiên nhẫn, ổn định và yêu thích cái đẹp. Bạn biết cách tận hưởng giá trị đích thực của cuộc sống." },
+        { name: "Song Tử", traits: "Thông minh, thích nghi nhanh và ham học hỏi. Khả năng giao tiếp là vũ khí mạnh nhất của bạn." },
+        { name: "Cự Giải", traits: "Tình cảm, trực giác tốt và luôn bảo vệ gia đình. Bạn có tâm hồn nhạy bén và ấm áp." },
+        { name: "Sư Tử", traits: "Hào phóng, tự tin và đầy quyền lực. Bạn luôn biết cách tỏa sáng giữa đám đông." },
+        { name: "Xử Nữ", traits: "Cẩn thận, phân tích tốt và cầu toàn. Bạn là người giải quyết mọi rắc rối một cách khoa học." },
+        { name: "Thiên Bình", traits: "Hòa nhã, công bằng và có gu thẩm mỹ cao. Bạn luôn tìm kiếm sự cân bằng trong mọi mối quan hệ." },
+        { name: "Bọ Cạp", traits: "Sâu sắc, mãnh liệt và đầy bí ẩn. Bạn có sức mạnh nội tâm không ai bì kịp." },
+        { name: "Nhân Mã", traits: "Lạc quan, yêu tự do và thích khám phá. Cuộc đời bạn là một cuộc hành trình dài đầy thú vị." }
+    ];
+
+    const tarotDeck = [
+        { name: "The Sun (Mặt Trời)", desc: "Sự rạng rỡ, thành công và sinh lực. Mọi dự định của bạn trong thời gian tới sẽ nhận được nguồn năng lượng tích cực nhất." },
+        { name: "The Star (Ngôi Sao)", desc: "Niềm hy vọng và cảm hứng. Sau những khó khăn, bầu trời của bạn đang dần tỏa sáng trở lại." },
+        { name: "The Magician (Nhà Ảo Thuật)", desc: "Khả năng biến ý tưởng thành hiện thực. Đây là lúc bạn nên hành động thay vì chỉ suy nghĩ." },
+        { name: "Wheel of Fortune (Bánh Xe Số Phận)", desc: "Sự thay đổi mang tính định mệnh. Hãy chuẩn bị tâm thế để đón nhận một bước ngoặt lớn." },
+        { name: "The Empress (Nữ Hoàng)", desc: "Sự sung túc, sáng tạo và nuôi dưỡng. Một kết quả ngọt ngào đang chờ bạn gặt hái." }
+    ];
+
+    const getNguHanh = (year) => {
+        const menh = ["Hải Trung Kim", "Lư Trung Hỏa", "Đại Lâm Mộc", "Lộ Bàng Thổ", "Kiếm Phong Kim", "Sơn Đầu Hỏa", "Giản Hạ Thủy", "Thành Đầu Thổ", "Bạch Lạp Kim", "Dương Liễu Mộc", "Tuyền Trung Thủy", "Ốc Thượng Thổ", "Tích Lịch Hỏa", "Tùng Bách Mộc", "Trường Lưu Thủy", "Sa Trung Kim", "Sơn Hạ Hỏa", "Bình Địa Mộc", "Bích Thượng Thổ", "Kim Bạch Kim", "Phúc Đăng Hỏa", "Thiên Hà Thủy", "Đại Trạch Thổ", "Thoa Xuyến Kim", "Tang Đố Mộc", "Đại Khê Thủy", "Sa Trung Thổ", "Thiên Thượng Hỏa", "Thạch Lựu Mộc", "Đại Hải Thủy"];
+        return menh[Math.floor((year - 1924) / 2) % 30];
+    };
+
+    const getCanChi = (y) => {
+        const can = ["Canh", "Tân", "Nhâm", "Quý", "Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ"];
+        const chi = ["Thân", "Dậu", "Tuất", "Hợi", "Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi"];
+        return can[y % 10] + " " + chi[y % 12];
+    }
+
+    // HÀM CHÍNH
+    function unlockDestiny() {
+        const dateInput = document.getElementById('userBirthday').value;
+        if (!dateInput) return alert("Vui lòng chọn ngày sinh để khai mở vận mệnh!");
+
+        const birth = new Date(dateInput);
+        const now = new Date(); // Mặc định 2026 theo hệ thống
+
+        // 1. Tính tuổi & Ngày đã sống
+        let age = now.getFullYear() - birth.getFullYear();
+        if (now.getMonth() < birth.getMonth() || (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate())) age--;
+        
+        const days = Math.floor((now - birth) / (1000 * 60 * 60 * 24));
+
+        // 2. Hoàng Đạo
+        const d = birth.getDate(), m = birth.getMonth() + 1;
+        const lastDays = [19, 18, 20, 19, 20, 20, 22, 22, 22, 22, 21, 21];
+        const zodiacIndex = (d > lastDays[m-1]) ? (m % 12) : (m - 1);
+        const zodiac = zodiacData[zodiacIndex];
+
+        // 3. Tarot (Ngẫu nhiên theo ngày)
+        const tarot = tarotDeck[Math.floor(Math.random() * tarotDeck.length)];
+
+        // 4. Đổ dữ liệu ra giao diện
+        document.getElementById('resAge').innerText = age + " Tuổi";
+        document.getElementById('resAgeMu').innerText = (now.getFullYear() - birth.getFullYear() + 1) + " Tuổi";
+        document.getElementById('resDays').innerText = days.toLocaleString();
+        document.getElementById('resCanChi').innerText = getCanChi(birth.getFullYear());
+        document.getElementById('resMenh').innerText = getNguHanh(birth.getFullYear());
+        document.getElementById('resZodiac').innerText = zodiac.name;
+        document.getElementById('resTraits').innerText = zodiac.traits;
+        document.getElementById('resTarotName').innerText = "Lá bài: " + tarot.name;
+        document.getElementById('resTarotDesc').innerText = tarot.desc;
+
+        document.getElementById('mainResult').style.display = "block";
+    }
+</script>
+
+</body>
+</html>
